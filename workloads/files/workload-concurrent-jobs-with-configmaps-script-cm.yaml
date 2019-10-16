@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: scale-ci-workload-script
+data:
+  run.sh: |
+    #!/bin/bash
+    jobs_amount=${NUMBER_OF_CONCURRENT_JOBS}
+    function create_jobs()
+    {
+    for i in $(seq 1 $jobs_amount);
+    do
+        cat /tmp/conc_jobs.yaml | sed "s/%JOB_ID%/$i/g" | oc create -f -
+    done
+    }
+    function wait_for_completion()
+    {
+      running=`oc get pods | grep -c Completed`
+      while [ $running -lt $jobs_amount ]; do
+        sleep 1
+        running=`oc get pods | grep -E "Completed|OOMKilled" | wc -l`
+        echo "$running jobs are completed"
+      done
+    }
+    start_time=`date +%s`
+    create_jobs
+    wait_for_completion
+    end_time=`date +%s`
+    total_time=`echo $end_time - $start_time | bc`
+    echo "OOMKILLED jobs:"
+    oc get pods | grep OOMKilled
+    echo "Time taken for creating $jobs_amount concurrent jobs with configmaps $total_time"
+  conc_jobs.yaml: |
+    # Example from: https://github.com/kubernetes/kubernetes/issues/74412#issue-413387234
+    ---
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: job-%JOB_ID%
+    data:
+      game.properties: |
+        enemies=aliens
+    ---
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      name: job-%JOB_ID%
+    spec:
+      template:
+        spec:
+          containers:
+          - name: busybox
+            image: busybox
+            resources:
+              requests:
+                memory: "50Mi"
+                cpu: "10m"
+            command: [ "/bin/echo" ]
+            args: [ "Hello, World!" ]
+            volumeMounts:
+            - name: config-volume
+              mountPath: /etc/config
+          volumes:
+            - name: config-volume
+              configMap:
+                name: job-%JOB_ID%
+          restartPolicy: Never
+      backoffLimit: 4
