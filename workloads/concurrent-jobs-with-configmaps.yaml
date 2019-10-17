@@ -24,7 +24,7 @@
       with_items:
         - src: scale-ci-tooling-ns.yml
           dest: "{{ansible_user_dir}}/scale-ci-tooling/scale-ci-tooling-ns.yml"
-        - src: workload-network-script-cm.yml
+        - src: workload-concurrent-jobs-with-configmaps-script-cm.yaml
           dest: "{{ansible_user_dir}}/scale-ci-tooling/workload-concurrent-jobs-with-configmaps-script-cm.yml"
 
     - name: Slurp kubeconfig file
