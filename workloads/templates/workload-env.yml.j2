@@ -103,4 +103,6 @@ data:
   PROMETHEUS_GRAPH_PERIOD: "{{prometheus_graph_period}}"
   PROMETHEUS_REFRESH_INTERVAL: "{{prometheus_refresh_interval}}"
   PROMETHEUS_SCALE_TEST_PREFIX: "{{prometheus_scale_test_prefix}}"
+{% elif workload_job == "concurrent-jobs" %}
+  NUMBER_OF_CONCURRENT_JOBS: "{{number_of_concurrent_jobs}}"
 {% endif %}

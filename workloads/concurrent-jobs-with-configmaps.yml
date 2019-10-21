@@ -8,7 +8,7 @@
   gather_facts: true
   remote_user: "{{orchestration_user}}"
   vars_files:
-    - vars/concurrent-jobs-with-configmaps.yaml
+    - vars/concurrent-jobs-with-configmaps.yml
   vars:
     workload_job: "concurrent-jobs"
   tasks:
@@ -24,7 +24,7 @@
       with_items:
         - src: scale-ci-tooling-ns.yml
           dest: "{{ansible_user_dir}}/scale-ci-tooling/scale-ci-tooling-ns.yml"
-        - src: workload-concurrent-jobs-with-configmaps-script-cm.yaml
+        - src: workload-concurrent-jobs-with-configmaps-script-cm.yml
           dest: "{{ansible_user_dir}}/scale-ci-tooling/workload-concurrent-jobs-with-configmaps-script-cm.yml"
 
     - name: Slurp kubeconfig file
@@ -74,6 +74,15 @@
       retries: 60
       delay: 1
       when: scale_ci_tooling_ns_exists.rc == 0
+
+    - name: Ensure project concurrent-jobs-workload from previous workload is deleted
+      shell: |
+        oc delete project concurrent-jobs-workload
+      register: concurrent_jobs_workload_project
+      failed_when: concurrent_jobs_workload_project.rc == 0
+      until: concurrent_jobs_workload_project.rc == 1
+      retries: 60
+      delay: 1
 
     - name: Block for non-existing tooling namespace
       block:
