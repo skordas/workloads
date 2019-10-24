@@ -75,3 +75,17 @@ Number of concurrent jobs with configmaps to create during workload.
 ### JOB_COMPLETION_POLL_ATTEMPTS
 Default: `360`  
 Number of retries for Ansible to poll if the workload job has completed. Poll attempts delay 10s between polls with some additional time taken for each polling action depending on the orchestration host setup.
+
+## Smoke test variables
+
+```
+CONCURRENT_JOBS_NODE_COUNT=4
+CONCURRENT_JOBS_TEST_PREFIX=concurrentjobs_smoke
+CONCURRENT_JOBS_CLEANUP=true
+CONCURRENT_JOBS_BASENAME=concurrentjobs
+CONCURRENT_JOBS_MAXPODS=1000
+CONCURRENT_JOBS_POD_IMAGE="gcr.io/google_containers/pause-amd64:3.0"
+CONCURRENT_JOBS_STEPSIZE=50
+CONCURRENT_JOBS_PAUSE=60
+CONCURRENT_JOBS_TS_TIMEOUT=180
+```

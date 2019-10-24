@@ -28,3 +28,14 @@ pbench_server: "{{ lookup('env', 'PBENCH_SERVER')|default('', true) }}"
 # Other variables for workload tests
 number_of_concurrent_jobs: "{{ lookup('env', 'NUMBER_OF_CONCURRENT_JOBS')|default(300, true)|int }}"
 job_completion_poll_attempts: "{{ lookup('env', 'JOB_COMPLETION_POLL_ATTEMPTS')|default(360, true)|int }}"
+
+# Concurrent jobs smoke test workload specific parameters:
+concurrent_jobs_node_count: "{{ lookup('env', 'CONCURRENT_JOBS_NODE_COUNT')|default(4, true)|int }}"
+concurrent_jobs_test_prefix: "{{ lookup('env', 'CONCURRENT_JOBS_TEST_PREFIX')|default('concurrentjobs_smoke', true) }}"
+concurrent_jobs_cleanup: "{{ lookup('env', 'CONCURRENT_JOBS_CLEANUP')|default(true, true)|bool|lower }}"
+concurrent_jobs_basename: "{{ lookup('env', 'CONCURRENT_JOBS_BASENAME')|default('concurrentjobs', true) }}"
+concurrent_jobs_maxpods: "{{ lookup('env', 'CONCURRENT_JOBS_MAXPODS')|default(1000, true)|int }}"
+concurrent_jobs_pod_image: "{{ lookup('env', 'CONCURRENT_JOBS_POD_IMAGE')|default('gcr.io/google_containers/pause-amd64:3.0', true) }}"
+concurrent_jobs_stepsize: "{{ lookup('env', 'CONCURRENT_JOBS_STEPSIZE')|default(50, true)|int }}"
+concurrent_jobs_pause: "{{ lookup('env', 'CONCURRENT_JOBS_PAUSE')|default(60, true)|int }}"
+concurrent_jobs_ts_timeout: "{{ lookup('env', 'CONCURRENT_JOBS_TS_TIMEOUT')|default(180, true)|int }}"
