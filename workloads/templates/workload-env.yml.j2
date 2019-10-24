@@ -103,4 +103,11 @@ data:
   PROMETHEUS_GRAPH_PERIOD: "{{prometheus_graph_period}}"
   PROMETHEUS_REFRESH_INTERVAL: "{{prometheus_refresh_interval}}"
   PROMETHEUS_SCALE_TEST_PREFIX: "{{prometheus_scale_test_prefix}}"
+{% elif workload_job == "storage-git" %}
+  STORAGE_PROJECT_NAME: "{{storage_project_name}}"
+  STORAGE_PROJECT_NUMBER: "{{storage_project_number}}"
+  DELETE_TEST_PROJECT_BEFORE_TEST: "{{delete_test_project_before_test}}"
+  VOLUME_CAPACITY: "{{volume_capacity}}"
+  STORAGE_CLASS_NAME: "{{storage_class_name}}"
+  ITERATION: "{{iteration}}"
 {% endif %}
