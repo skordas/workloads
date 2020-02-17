@@ -24,8 +24,6 @@
       with_items:
         - src: scale-ci-tooling-ns.yml
           dest: "{{ansible_user_dir}}/scale-ci-tooling/scale-ci-tooling-ns.yml"
-        - src: workload-network-script-cm.yml
-          dest: "{{ansible_user_dir}}/scale-ci-tooling/workload-network-script-cm.yml"
 
     - name: Slurp kubeconfig file
       slurp:
@@ -58,10 +56,24 @@
         oc get nodes --no-headers --show-labels -l node-role.kubernetes.io/worker= | grep -v uperf=client | head -n 1 | awk '{print $1}' | xargs -I % oc label nodes % uperf=server
       when: not enable_pbench_agents|bool
 
+    - name: Block to set clustername
+      block:
+        - name: Get cluster name
+          shell: |
+            {%raw%}oc get machineset -n openshift-machine-api -o=go-template='{{index (index .items 0).metadata.labels "machine.openshift.io/cluster-api-cluster"}}'{%endraw%}
+          register: cluster_name
+
+        - name: Create tooling service account
+          set_fact:
+            snafu_cluster_name: cluster_name.stdout
+          when: cluster_name is succeeded
+      when: snafu_cluster_name == ""
+
     - name: Template workload templates
       template:
         src: "{{item.src}}"
         dest: "{{item.dest}}"
+        lstrip_blocks: yes
       with_items:
         - src: pbench-cm.yml.j2
           dest: "{{ansible_user_dir}}/scale-ci-tooling/pbench-cm.yml"
@@ -73,6 +85,8 @@
           dest: "{{ansible_user_dir}}/scale-ci-tooling/workload-job.yml"
         - src: workload-env.yml.j2
           dest: "{{ansible_user_dir}}/scale-ci-tooling/workload-network-env.yml"
+        - src: workload-network-script-cm.yml.j2
+          dest: "{{ansible_user_dir}}/scale-ci-tooling/workload-network-script-cm.yml"
 
     - name: Check if scale-ci-tooling namespace exists
       shell: |
@@ -123,6 +137,11 @@
     - name: Create/replace workload script environment configmap
       shell: |
         oc replace --force -n scale-ci-tooling -f "{{ansible_user_dir}}/scale-ci-tooling/workload-network-env.yml"
+
+    - name: Enable azure authentication when running ocp on azure
+      include_role:
+        name: azure-auth
+      when: azure_auth and azure_auth_file != ""
 
     - name: Create/replace workload job to that runs workload script
       shell: |

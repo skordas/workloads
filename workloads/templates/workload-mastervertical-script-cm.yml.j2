@@ -79,8 +79,16 @@ data:
     if [ "${PBENCH_INSTRUMENTATION}" = "true" ]; then
       result_dir=${benchmark_results_dir}
     fi
+    if [[ "${AZURE_AUTH}" == "true" ]]; then
+      export AZURE_AUTH_LOCATION=/tmp/azure_auth
+    fi
     start_time=$(date +%s)
-    VIPERCONFIG=/tmp/mastervertical.yaml openshift-tests run-test "[Feature:Performance][Serial][Slow] Load cluster concurrently with templates [Suite:openshift]" | tee "${result_dir}/clusterloader.txt"
+    export cluster_name={{ snafu_cluster_name }}
+    export test_user={{ snafu_user }}
+    export es={{ snafu_es_host }}
+    export es_port={{ snafu_es_port }}
+    export es_index={{ snafu_es_index_prefix }}
+    VIPERCONFIG=/tmp/mastervertical.yaml python /tmp/snafu/run_snafu.py -t cl scale-ci --cl-output True --dir "${result_dir}" -p openshift-tests | tee "${result_dir}/clusterloader.txt"
     exit_code=$?
     end_time=$(date +%s)
     duration=$((end_time-start_time))
@@ -99,6 +107,7 @@ data:
         - num: ${MASTERVERTICAL_PROJECTS}
           basename: ${MASTERVERTICAL_BASENAME}
           ifexists: delete
+          nodeselector: "node-role.kubernetes.io/worker="
           templates:
             - num: 3
               file: /root/workload/build-config-template.yaml

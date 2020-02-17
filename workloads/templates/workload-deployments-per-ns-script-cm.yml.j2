@@ -38,7 +38,16 @@ data:
 
     # Start of Test Code
     echo "$(date -u) Running Deployments per ns cluster limits test"
-    pbench-user-benchmark -- 'VIPERCONFIG=/root/workload/cluster-limits-deployments-per-namespace.yaml openshift-tests run-test "[Feature:Performance][Serial][Slow] Load cluster should load the cluster [Suite:openshift]"'
+    if [[ "${AZURE_AUTH}" == "true" ]]; then
+      export AZURE_AUTH_LOCATION=/tmp/azure_auth
+    fi
+    mkdir -p /tmp/snafu_results
+    export cluster_name={{ snafu_cluster_name }}
+    export test_user={{ snafu_user }}
+    export es={{ snafu_es_host }}
+    export es_port={{ snafu_es_port }}
+    export es_index={{ snafu_es_index_prefix }}
+    pbench-user-benchmark -- 'VIPERCONFIG=/root/workload/cluster-limits-deployments-per-namespace.yaml python /tmp/snafu/run_snafu.py -t cl scale-ci --cl-output True --dir /tmp/snafu_results -p openshift-tests'
     pbench-copy-results --prefix {{deployments_per_ns_test_prefix}}
     echo "$(date -u) Completed running Deployments per ns cluster limits test"
     # End of Test Code
@@ -51,6 +60,7 @@ data:
         - num: 1
           basename: {{deployments_per_ns_basename}}
           ifexists: delete
+          nodeselector: "node-role.kubernetes.io/worker="
           templates:
             - num: {{deployments_per_ns_count}}
               file: deployment-config-cluster-limits-deployments.yaml

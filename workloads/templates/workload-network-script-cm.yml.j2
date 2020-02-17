@@ -65,8 +65,15 @@ data:
       else
         PAIR_COUNT=${pair_count} envsubst < /root/workload/p2p-network.yaml.template > /tmp/network.yaml
       fi
-
-      VIPERCONFIG=/tmp/network.yaml openshift-tests run-test "[Feature:Performance][Serial][Slow] Load cluster should load the cluster [Suite:openshift]"
+      if [[ "${AZURE_AUTH}" == "true" ]]; then
+        export AZURE_AUTH_LOCATION=/tmp/azure_auth
+      fi
+      export cluster_name={{ snafu_cluster_name }}
+      export test_user={{ snafu_user }}
+      export es={{ snafu_es_host }}
+      export es_port={{ snafu_es_port }}
+      export es_index={{ snafu_es_index_prefix }}
+      VIPERCONFIG=/tmp/network.yaml python /tmp/snafu/run_snafu.py -t cl scale-ci --cl-output True --dir "${result_dir}" -p openshift-tests
 
       # Check if clients and servers are ready
       for rc_num in `seq 0 $((${pair_count} - 1))`
@@ -161,6 +168,7 @@ data:
       - num: 1
         basename: "${NETWORK_TEST_BASENAME}"
         ifexists: delete
+        nodeselector: "node-role.kubernetes.io/worker="
         templates:
         - num: 1
           file: /root/workload/pbench-ssh.yaml

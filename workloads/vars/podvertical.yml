@@ -9,6 +9,13 @@ orchestration_user: "{{ lookup('env', 'ORCHESTRATION_USER')|default('root', true
 ###############################################################################
 # PodVertical workload variables.
 ###############################################################################
+# snafu es variables
+snafu_es_host: "{{ lookup('env', 'ES_HOST')|default('', true) }}"
+snafu_es_port: "{{ lookup('env', 'ES_PORT')|default('', true) }}"
+snafu_es_index_prefix: "{{ lookup('env', 'ES_INDEX_PREFIX')|default('snafu', true) }}"
+snafu_cluster_name: "{{ lookup('env', 'SNAFU_CLUSTER_NAME')|default('', true) }}"
+snafu_user: "{{ lookup('env', 'SNAFU_USER')|default('scale-ci', true) }}"
+
 workload_image: "{{ lookup('env', 'WORKLOAD_IMAGE')|default('quay.io/openshift-scale/scale-ci-workload', true) }}"
 
 workload_job_node_selector: "{{ lookup('env', 'WORKLOAD_JOB_NODE_SELECTOR')|default(false, true)|bool }}"
@@ -24,6 +31,10 @@ enable_pbench_copy: "{{ lookup('env', 'ENABLE_PBENCH_COPY')|default(false, true)
 pbench_ssh_private_key_file: "{{ lookup('env', 'PBENCH_SSH_PRIVATE_KEY_FILE')|default('~/.ssh/id_rsa', true) }}"
 pbench_ssh_public_key_file: "{{ lookup('env', 'PBENCH_SSH_PUBLIC_KEY_FILE')|default('~/.ssh/id_rsa.pub', true) }}"
 pbench_server: "{{ lookup('env', 'PBENCH_SERVER')|default('', true) }}"
+
+# Azure auth vars to set for ocp on azure
+azure_auth: "{{ lookup('env', 'AZURE_AUTH')|default(false, true)|bool|lower }}"
+azure_auth_file: "{{ lookup('env', 'AZURE_AUTH_FILE')|default('', true) }}"
 
 # Other variables for workload tests
 scale_ci_results_token: "{{ lookup('env', 'SCALE_CI_RESULTS_TOKEN')|default('', true) }}"

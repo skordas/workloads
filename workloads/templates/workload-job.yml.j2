@@ -25,7 +25,7 @@ spec:
 {% if workload_job == "pvcscale" %}
       serviceAccountName: useroot
 {% endif %}
-{% if workload_job_privileged %}
+{% if workload_job_privileged| bool %}
       serviceAccountName: useroot
       hostNetwork: true
 {% endif %}
@@ -62,6 +62,13 @@ spec:
         - name: pbench-ssh
           mountPath: /.ssh/id_rsa.pub
           subPath: id_rsa.pub
+{% if workload_job != "scale" and workload_job != "prometheus-scale" and workload_job != "baseline" and workload_job != "http" and workload_job != "test" %}
+    {% if azure_auth| bool %}
+        - name: azure-auth
+          mountPath: /tmp/azure_auth
+          subPath: azure_auth
+    {% endif %}
+{% endif %}
         - name: unprivileged-ssh
           mountPath: /.ssh
         - name: pbench-ssh
@@ -69,8 +76,7 @@ spec:
           subPath: id_rsa
         - name: pbench-results
           mountPath: /var/lib/pbench-agent
-
-{% if enable_pbench_agents %}
+{% if enable_pbench_agents| bool %}
         - name: ocp-volumes
           mountPath: /var/lib/kubelet/pods
         - name: proc-mount
@@ -85,7 +91,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
-{% if enable_pbench_agents %}
+{% if enable_pbench_agents| bool %}
         ports:
         - containerPort: 2022
 {% endif %}
@@ -107,9 +113,16 @@ spec:
         secret:
           secretName: pbench-ssh
           defaultMode: 0600
+{% if workload_job != "scale" and workload_job != "prometheus-scale" and workload_job != "baseline" and workload_job != "http" and workload_job != "test" %}
+    {% if azure_auth| bool %}
+      - name: azure-auth
+        secret:
+          secretName: azure-auth
+    {% endif %}
+{% endif %}
       - name: unprivileged-ssh
         emptyDir: {}
-{% if enable_pbench_agents %}
+{% if enable_pbench_agents| bool %}
       - name: pbench-results
         hostPath:
           path: /var/lib/pbench-agent
@@ -127,7 +140,7 @@ spec:
       nodeSelector:
         node-role.kubernetes.io/workload: ""
 {% endif %}
-{% if workload_job_taint %}
+{% if workload_job_taint| bool %}
       tolerations:
       - key: "role"
         value: "workload"

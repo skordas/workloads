@@ -23,6 +23,26 @@ $ time ansible-playbook -vv -i inventory workloads/pvcscale.yml
 
 ## Environment variables
 
+### ES_HOST
+Default: ``
+Elasticsearch server host address (currently used by snafu), set to index results from cluster loader
+
+### ES_PORT
+Default: ``
+Elasticsearch server port (currently used by snafu), set to index results from cluster loader
+
+### ES_INDEX_PREFIX
+Default: `snafu`
+Elasticsearch server index prefix (currently used by snafu)
+
+### SNAFU_USER
+Default: `scale-ci`
+user running the tests, used for identifying test results.
+
+### SNAFU_CLUSTER_NAME
+Default: (defaults to the clustername in the machineset)
+clustername on which the tests are running, used for identifying test results.
+
 ### PUBLIC_KEY
 Default: `~/.ssh/id_rsa.pub`  
 Public ssh key file for Ansible.
@@ -79,6 +99,14 @@ Future use for pbench and prometheus scraper to place results into git repo that
 Default: `360`  
 Number of retries for Ansible to poll if the workload job has completed. Poll attempts delay 10s between polls with some additional time taken for each polling action depending on the orchestration host setup.
 
+### AZURE_AUTH
+Default: false
+Set it to true when running OCP on Azure.
+
+### AZURE_AUTH_FILE
+Default: ''
+Path to the Azure auth file - terraform.azure.auto.tfvars.json found in the openshift install dir on the orchestration host i.e scale-ci-deploy/scale-ci-azure/terraform.azure.auto.tfvars.json.
+
 ### PVCSCALE_TEST_PREFIX
 Default: `pvcscale`  
 Test to prefix the pbench results.
@@ -123,7 +151,7 @@ Default: `ReadWriteOnce`
 
 Default: None
 If there is need for Pods to start on specific nodes based on node selector this parameter will ensure that Pods
-are starting on nodes with desired labels. It is prerequst that nodes are labeled with proper labels. 
+are starting on nodes with desired labels. It is prerequst that nodes are labeled with proper labels.
 ### Smoke test variables
 
 ```

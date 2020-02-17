@@ -9,6 +9,12 @@ orchestration_user: "{{ lookup('env', 'ORCHESTRATION_USER')|default('root', true
 ###############################################################################
 # RHCOS pvcscale workload variables.
 ###############################################################################
+# snafu es variables
+snafu_es_host: "{{ lookup('env', 'ES_HOST')|default('', true) }}"
+snafu_es_port: "{{ lookup('env', 'ES_PORT')|default('', true) }}"
+snafu_es_index_prefix: "{{ lookup('env', 'ES_INDEX_PREFIX')|default('snafu', true) }}"
+snafu_cluster_name: "{{ lookup('env', 'SNAFU_CLUSTER_NAME')|default('', true) }}"
+snafu_user: "{{ lookup('env', 'SNAFU_USER')|default('scale-ci', true) }}"
 
 # Container image in use
 workload_image: "{{ lookup('env', 'WORKLOAD_IMAGE')|default('quay.io/openshift-scale/scale-ci-workload', true) }}"
@@ -29,6 +35,10 @@ pbench_ssh_public_key_file: "{{ lookup('env', 'PBENCH_SSH_PUBLIC_KEY_FILE')|defa
 enable_pbench_agents: "{{ lookup('env', 'ENABLE_PBENCH_AGENTS')|default(false, true)|bool }}"
 pbench_server: "{{ lookup('env', 'PBENCH_SERVER')|default('', true) }}"
 
+# Azure auth vars to set for ocp on azure
+azure_auth: "{{ lookup('env', 'AZURE_AUTH')|default(false, true)|bool|lower }}"
+azure_auth_file: "{{ lookup('env', 'AZURE_AUTH_FILE')|default('', true) }}"
+
 # Other variables for workload tests
 scale_ci_results_token: "{{ lookup('env', 'SCALE_CI_RESULTS_TOKEN')|default('', true) }}"
 job_completion_poll_attempts: "{{ lookup('env', 'JOB_COMPLETION_POLL_ATTEMPTS')|default(360, true)|int }}"
@@ -44,4 +54,4 @@ pvcscale_pause: "{{ lookup('env', 'PVCSCALE_PAUSE')|default(0, true)|int }}"
 pvcscale_storage_size: "{{ lookup('env', 'PVCSCALE_STORAGE_SIZE')|default('1Gi', true) }}"
 pvcscale_storageclass: "{{ lookup('env', 'PVCSCALE_STORAGECLASS')|default('', true) }}"
 pvcscale_access_modes: "{{ lookup('env', 'PVCSCALE_ACCESS_MODES')|default('ReadWriteOnce',true) }}"
-pvcscale_nodeselector: "{{ lookup('env', 'PVCSCALE_NODESELECTOR')|default('', true) }}" 
+pvcscale_nodeselector: "{{ lookup('env', 'PVCSCALE_NODESELECTOR')|default('', true) }}"

@@ -79,8 +79,16 @@ data:
     if [ "${PBENCH_INSTRUMENTATION}" = "true" ]; then
       result_dir=${benchmark_results_dir}
     fi
+    if [[ "${AZURE_AUTH}" == "true" ]]; then
+      export AZURE_AUTH_LOCATION=/tmp/azure_auth
+    fi
     start_time=$(date +%s)
-    VIPERCONFIG=/tmp/namespaces_per_cluster.yaml openshift-tests run-test "[Feature:Performance][Serial][Slow] Load cluster should load the cluster [Suite:openshift]" | tee "${result_dir}/clusterloader.txt"
+    export cluster_name={{ snafu_cluster_name }}
+    export test_user={{ snafu_user }}
+    export es={{ snafu_es_host }}
+    export es_port={{ snafu_es_port }}
+    export es_index={{ snafu_es_index_prefix }}
+    VIPERCONFIG=/tmp/namespaces_per_cluster.yaml python /tmp/snafu/run_snafu.py -t cl scale-ci --cl-output True --dir "${result_dir}" -p openshift-tests | tee "${result_dir}/clusterloader.txt"
     exit_code=$?
     end_time=$(date +%s)
     duration=$((end_time-start_time))
@@ -99,6 +107,7 @@ data:
         - num: ${NAMESPACES_PER_CLUSTER_COUNT}
           basename: ${NAMESPACES_PER_CLUSTER_BASENAME}
           ifexists: reuse
+          nodeselector: "node-role.kubernetes.io/worker="
           templates:
             - num: 1
               file: /root/workload/bc-imagestream-template.yaml
@@ -232,7 +241,7 @@ data:
     apiVersion: v1
     metadata:
       name: sshSecretTemplate
-      creationTimestamp: 
+      creationTimestamp:
       annotations:
         description: This template will create a single secret.
         tags: ''
